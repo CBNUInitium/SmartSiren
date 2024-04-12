@@ -15,6 +15,5 @@
 ## Sources
 - Android Studio 
 - MySQL
-- Github
 - Kakao map API
 - Firebase
