@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "398423576277",
+    "project_id": "opensw-132c8",
+    "storage_bucket": "opensw-132c8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:398423576277:android:294e964379ac7d544b9c5c",
+        "android_client_info": {
+          "package_name": "com.kms.opensw"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHcKWM3RVypDOTga02YjXHJhgWau1cOT4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
