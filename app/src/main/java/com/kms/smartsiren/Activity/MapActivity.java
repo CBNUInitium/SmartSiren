@@ -127,6 +127,8 @@ public class MapActivity extends AppCompatActivity {
 
         mFirebaseAuth = FirebaseAuth.getInstance();
 
+
+        // DB 확인하는거 이벤트 추가
         mDatabaseRef = FirebaseDatabase.getInstance().getReference("SmartSiren");
         mDatabaseRef.child("Unconfirmed").addChildEventListener(new ChildEventListener() {
             @Override
@@ -214,24 +216,18 @@ public class MapActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         TextView navLogout = findViewById(R.id.text_logout);
-        navLogout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new AlertDialog.Builder(MapActivity.this)
-                        .setTitle("안내")
-                        .setMessage("로그아웃 하시겠습니까?")
-                        .setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                mFirebaseAuth.signOut();
-                                Intent intent = new Intent(MapActivity.this, LoginActivity.class); // Replace LoginActivity with your actual login activity class
-                                startActivity(intent);
-                                finish();
-                            }
-                        })
-                        .show();
-            }
-        });
+        navLogout.setOnClickListener(v -> new AlertDialog.Builder(MapActivity.this)
+                .setTitle("안내")
+                .setMessage("로그아웃 하시겠습니까?")
+                .setPositiveButton("확인", (dialog, which) -> {
+                    mFirebaseAuth.signOut();
+                    Intent intent = new Intent(MapActivity.this, LoginActivity.class); // Replace LoginActivity with your actual login activity class
+                    startActivity(intent);
+                    finish();
+                })
+                .show());
+
+
 
         TextView text_appguide = findViewById(R.id.text_appguide);
         text_appguide.setOnClickListener(new View.OnClickListener() {
@@ -242,22 +238,17 @@ public class MapActivity extends AppCompatActivity {
             }
         });
 
+
         TextView text_useredit = findViewById(R.id.text_useredit);
-        text_useredit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapActivity.this, UserEditActivity.class);
-                startActivity(intent);
-            }
+        text_useredit.setOnClickListener(v -> {
+            Intent intent = new Intent(MapActivity.this, UserEditActivity.class);
+            startActivity(intent);
         });
 
         TextView text_myupdate = findViewById(R.id.text_myupdate);
-        text_myupdate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapActivity.this, MyupdateActivity.class);
-                startActivity(intent);
-            }
+        text_myupdate.setOnClickListener(v -> {
+            Intent intent = new Intent(MapActivity.this, MyupdateActivity.class);
+            startActivity(intent);
         });
 
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -270,12 +261,9 @@ public class MapActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         Button goButton = findViewById(R.id.btn_report);
-        goButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MapActivity.this, ReportActivity.class); // Replace ReportActivity with your actual report activity class
-                startActivity(intent);
-            }
+        goButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MapActivity.this, ReportActivity.class); // Replace ReportActivity with your actual report activity class
+            startActivity(intent);
         });
 
         mapView.start(new MapLifeCycleCallback() {
@@ -311,14 +299,11 @@ public class MapActivity extends AppCompatActivity {
             }
         });
 
-        btn_address_search.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String text = et_address_search.getText().toString();
-                new Thread(() -> {
-                    LocationSearch(text); // network 동작, 인터넷에서 xml을 받아오는 코드
-                }).start();
-            }
+        btn_address_search.setOnClickListener(v -> {
+            String text = et_address_search.getText().toString();
+            new Thread(() -> {
+                LocationSearch(text); // network 동작, 인터넷에서 xml을 받아오는 코드
+            }).start();
         });
     }
 
@@ -353,21 +338,18 @@ public class MapActivity extends AppCompatActivity {
             }
         });
 
-        task.addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    // Location settings are not satisfied, but this can be fixed
-                    // by showing the user a dialog.
-                    try {
-                        // Show the dialog by calling startResolutionForResult(),
-                        // and check the result in onActivityResult().
-                        ResolvableApiException resolvable = (ResolvableApiException) e;
-                        resolvable.startResolutionForResult(MapActivity.this,
-                                REQUEST_CHECK_SETTINGS);
-                    } catch (IntentSender.SendIntentException sendEx) {
-                        // Ignore the error.
-                    }
+        task.addOnFailureListener(this, e -> {
+            if (e instanceof ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    ResolvableApiException resolvable = (ResolvableApiException) e;
+                    resolvable.startResolutionForResult(MapActivity.this,
+                            REQUEST_CHECK_SETTINGS);
+                } catch (IntentSender.SendIntentException sendEx) {
+                    // Ignore the error.
                 }
             }
         });
