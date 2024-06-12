@@ -21,7 +21,7 @@ public class KNNAlgorithm {
     private List<CaseInfo> trainingData = new ArrayList<CaseInfo>();
     public CaseInfo chk;
     public String predict_label = "NEW";
-    private static final double RADIUS_THRESHOLD = 1; // 1미터
+    private static final double RADIUS_THRESHOLD = 50; // 1미터
 
     public interface MyCallback {
         void onCallback(String value, int depth);
@@ -44,7 +44,7 @@ public class KNNAlgorithm {
 
     // k-NN 알고리즘 예측 메서드 (k = 1)
     public String predict(CaseInfo testPoint) {
-        Log.e("pre", "start");
+        Log.e("pre", "Start Predict");
         if (trainingData == null || trainingData.isEmpty()) {
             Log.e("pre", "EMty");
             // 훈련 데이터가 비어있을 때
@@ -58,12 +58,13 @@ public class KNNAlgorithm {
 
         // 가장 가까운 이웃 선택 (k = 1)
         CaseInfo nearestNeighbor = sortedData.get(0);
-        Log.e("pre", "choose one");
+        Log.e("pre", "choose one " + nearestNeighbor.calculateManhattanDistance(testPoint));
         // 거리가 r = 0.5 이상이면 UUID 발급
         if (nearestNeighbor.calculateManhattanDistance(testPoint) >= RADIUS_THRESHOLD) {
+            Log.e("pre", "far");
             return "NEW";
         }
-
+        Log.e("pre", "near");
         // 그 외의 경우 가장 가까운 이웃의 레이블 반환
         return (nearestNeighbor.getUuid());
     }
@@ -122,7 +123,7 @@ public class KNNAlgorithm {
 
     public void startLabeling(CaseInfo pivot, MyCallback outCallback){
         chk = pivot;
-        Log.e("KNN", "Start");
+        Log.e("KNN", "Start Labeling");
         readData(new MyCallback() {
             @Override
             public void onCallback(String value, int depth) {

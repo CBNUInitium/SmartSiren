@@ -229,14 +229,14 @@ public class MapActivity extends AppCompatActivity {
 
 
 
-        TextView text_appguide = findViewById(R.id.text_appguide);
+        /*TextView text_appguide = findViewById(R.id.text_appguide);
         text_appguide.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MapActivity.this, AppguideActivity.class);
                 startActivity(intent);
             }
-        });
+        });*/
 
 
         TextView text_useredit = findViewById(R.id.text_useredit);
