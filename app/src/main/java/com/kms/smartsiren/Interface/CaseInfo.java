@@ -21,7 +21,7 @@ public class CaseInfo {
         this.uuid = uuid;
     }
     public double calculateManhattanDistance(CaseInfo otherPoint) {
-        return HaversineTool.haversine(this.latitude, this.longitude, otherPoint.latitude, otherPoint.latitude);
+        return HaversineTool.haversine(this.latitude, this.longitude, otherPoint.latitude, otherPoint.longitude);
     }
 
     /*
