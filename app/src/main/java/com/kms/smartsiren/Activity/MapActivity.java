@@ -110,7 +110,7 @@ public class MapActivity extends AppCompatActivity {
     LocationRequest locationRequest;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle actionBarDrawerToggle;
-    Label centerLabel;
+    Label centerLabel, label;
     LabelLayer labelLayer;
     TextView tv_name;
     private Polygon animationPolygon;
@@ -289,6 +289,14 @@ public class MapActivity extends AppCompatActivity {
             public void onMapReady(KakaoMap Map) {
                 kakaoMap = Map;
                 labelLayer = kakaoMap.getLabelManager().getLayer();
+
+                // 라벨 클릭 리스너
+                kakaoMap.setOnLabelClickListener((kakaoMap, labelLayer, label) -> {
+                    // 라벨 아이디 출력
+                    String message = "Label clicked: " + label.getLabelId() + "\n";
+                    Toast.makeText(MapActivity.this, message, Toast.LENGTH_LONG).show();
+                });
+
                 if (ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(MapActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
                 } else {
