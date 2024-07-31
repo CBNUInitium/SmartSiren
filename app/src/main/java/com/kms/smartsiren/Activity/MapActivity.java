@@ -398,9 +398,7 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult != null) {
-                    if (locationResult == null) {
-                        return;
-                    }
+
                     //Showing the latitude, longitude and accuracy on the home screen.
                     for (Location location : locationResult.getLocations()) {
                         // 현재위치 저장하기(LocationManager)
@@ -571,7 +569,7 @@ public class MapActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(Location location) {
                             LatLng.from(location.getLatitude(), location.getLongitude());
-                            if (HaversineTool.haversine(child.getLatitude(), child.getLongitude(), location.getLatitude(), location.getLongitude()) < 10000); {
+                            if (HaversineTool.haversine(child.getLatitude(), child.getLongitude(), location.getLatitude(), location.getLongitude()) < 10000) {
                                 // 테스트 용 10KM 이내
                                 showWarningDialog();
                             }
