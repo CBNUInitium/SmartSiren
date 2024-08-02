@@ -119,7 +119,7 @@ public class MapActivity extends AppCompatActivity {
     private FirebaseAuth mFirebaseAuth;
     private DatabaseReference mDatabaseRef;
     private MediaPlayer mediaPlayer;
-
+    LocationCallback locationCallback;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -275,14 +275,17 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onMapPaused() {
                 super.onMapPaused();
+                fusedLocationClient.removeLocationUpdates(locationCallback);
             }
             @Override
             public void onMapDestroy() {
-                // Map API is destroyed
+                //맵 종료시 locationCallback 종료
+                fusedLocationClient.removeLocationUpdates(locationCallback);
             }
             @Override
             public void onMapError(Exception error) {
                 // Error during map usage
+                Log.d("MainMap", error.getMessage());
             }
         }, new KakaoMapReadyCallback() {
             @Override
@@ -313,6 +316,27 @@ public class MapActivity extends AppCompatActivity {
                 LocationSearch(text); // network 동작, 인터넷에서 xml을 받아오는 코드
             }).start();
         });
+
+        Button btn_current_location = findViewById(R.id.btn_current_location);
+        btn_current_location.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(MapActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
+                } else {
+                    fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null) {
+                                CameraUpdate cameraUpdate = CameraUpdateFactory.newCenterPosition(LatLng.from(location.getLatitude(), location.getLongitude()));
+                                // 지도의 카메라 위치를 업데이트
+                                kakaoMap.moveCamera(cameraUpdate, CameraAnimation.from(500, true, true));
+                            }
+                        }
+                    });
+                }
+            }
+        });
     }
 
     // Rest of your methods (createLocationRequest, getLastLocation, startLocationUpdates, onOptionsItemSelected, etc.)
@@ -326,58 +350,46 @@ public class MapActivity extends AppCompatActivity {
 
     //위치 요청 설정
     protected void createLocationRequest() {
+        //LocationRequest를 생성 및 설정
         locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 100)
-                .setIntervalMillis(1000)             // Sets the interval for location updates
-                .setMinUpdateIntervalMillis(500)  // Sets the fastest allowed interval of location updates.
-                .setWaitForAccurateLocation(true)              // Want Accurate location updates make it true or you get approximate updates
-                .setMaxUpdateDelayMillis(100)                   // Sets the longest a location update may be delayed.
+                .setIntervalMillis(1000)            // 위치 업데이트 간격 설정
+                .setMinUpdateIntervalMillis(500)   //위치 업데이트의 가장 빠른 허용 간격을 설정
+                .setWaitForAccurateLocation(true)  // 정확한 위치 업데이트
+                .setMaxUpdateDelayMillis(100)      //위치 업데이트가 지연될 수 있는 최장 시간
                 .build();
 
+        //위치 설정 요청(LocationRequest)을 빌드
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+
+        // SettingsClient를 사용하여 위치 설정을 확인
         SettingsClient client = LocationServices.getSettingsClient(this);
-        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
-
-        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                // All location settings are satisfied. The client can initialize
-                // location requests here.
-                // ...
-            }
-        });
-
-        task.addOnFailureListener(this, e -> {
-            if (e instanceof ResolvableApiException) {
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
-                try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    ResolvableApiException resolvable = (ResolvableApiException) e;
-                    resolvable.startResolutionForResult(MapActivity.this,
-                            REQUEST_CHECK_SETTINGS);
-                } catch (IntentSender.SendIntentException sendEx) {
-                    // Ignore the error.
-                }
-            }
-        });
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build())
+                .addOnSuccessListener(locationSettingsResponse ->
+                        Log.d("MainMap", "locationRequest setting success")) // 성공 시 로그 출력
+                .addOnFailureListener(e ->
+                        Log.d("MainMap", "locationRequest setting fail")); // 실패 시 로그 출력;
     }
 
-    //마지막 위치
+    //마지막으로 알려진 위치 요청
     @SuppressLint("MissingPermission")
     private void getLastLocation() {
+        //마지막으로 알려진 위치 요청
         fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
                 if (location != null) {
                     // 현재 위치의 위도와 경도를 기반으로 카메라 업데이트 생성
                     CameraUpdate cameraUpdate = CameraUpdateFactory.newCenterPosition(LatLng.from(location.getLatitude(), location.getLongitude()));
-                    // 지도의 카메라 위치를 업데이트
+
+                    // 카카오 지도의 카메라 위치를 마지막 위치로 업데이트
                     kakaoMap.moveCamera(cameraUpdate, CameraAnimation.from(500, true, true));
 
-                    centerLabel = labelLayer.addLabel(LabelOptions.from("centerLabel", LatLng.from(location.getLatitude(), location.getLongitude()))
-                            .setStyles(LabelStyle.from(R.drawable.usercurrentlocation).setAnchorPoint(0.5f, 0.5f))
-                            .setRank(1));
+                    if(centerLabel == null){
+                        //유저 라벨 생성 및 표시
+                        centerLabel = labelLayer.addLabel(LabelOptions.from("centerLabel", LatLng.from(location.getLatitude(), location.getLongitude()))
+                                .setStyles(LabelStyle.from(R.drawable.usercurrentlocation).setAnchorPoint(0.5f, 0.5f))
+                                .setRank(1));
+                    }
 
                     FirebaseUser user = mFirebaseAuth.getCurrentUser();
                     if(user == null)
@@ -391,33 +403,14 @@ public class MapActivity extends AppCompatActivity {
 
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
-        //버튼 및 텍스트
-        Button btn_current_location = findViewById(R.id.btn_current_location);
-
-        LocationCallback locationCallback = new LocationCallback() {
+        locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult != null) {
-
-                    //Showing the latitude, longitude and accuracy on the home screen.
                     for (Location location : locationResult.getLocations()) {
                         // 현재위치 저장하기(LocationManager)
                         LocationManager.getInstance().setCurrentLocation(location);
                         centerLabel.moveTo(LatLng.from(location.getLatitude(), location.getLongitude()));
-                        //현재위치 버튼 눌렀을 때 작동하는 부분
-                        btn_current_location.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                if (ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                                    ActivityCompat.requestPermissions(MapActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION);
-                                } else {
-                                    CameraUpdate cameraUpdate = CameraUpdateFactory.newCenterPosition(LatLng.from(location.getLatitude(), location.getLongitude()));
-                                    // 지도의 카메라 위치를 업데이트
-                                    kakaoMap.moveCamera(cameraUpdate, CameraAnimation.from(500, true, true));
-                                }
-                            }
-                        });
-
                     }
                 }
             }
