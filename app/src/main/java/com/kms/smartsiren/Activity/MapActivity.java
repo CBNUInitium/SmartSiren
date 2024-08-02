@@ -630,7 +630,13 @@ public class MapActivity extends AppCompatActivity {
         }
     }
 
-
+    public void showDetailInfo(View v){
+        Intent intent = new Intent(MapActivity.this, DetailInfo.class);
+        intent.putExtra("eventCode", "화재");
+        intent.putExtra("reliabilityLvl", "높음");
+        intent.putExtra("detail", "우리집에 불이났어요");
+        startActivity(intent);
+    }
 }
 
 
