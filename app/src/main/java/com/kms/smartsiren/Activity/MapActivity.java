@@ -120,6 +120,7 @@ public class MapActivity extends AppCompatActivity {
     private DatabaseReference mDatabaseRef;
     private MediaPlayer mediaPlayer;
     LocationCallback locationCallback;
+    CameraUpdate cameraUpdate;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -266,7 +267,9 @@ public class MapActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        //카카오맵 시작
         mapView.start(new MapLifeCycleCallback() {
+            //지도의 LifeCycle 관련 이벤트를 수신
             @Override
             public void onMapResumed() {
                 super.onMapResumed();
@@ -275,21 +278,22 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onMapPaused() {
                 super.onMapPaused();
-                fusedLocationClient.removeLocationUpdates(locationCallback);
             }
             @Override
             public void onMapDestroy() {
-                //맵 종료시 locationCallback 종료
+                // 지도 API 가 정상적으로 종료될 때 호출됨
+                // 맵 종료시 locationCallback 종료
                 fusedLocationClient.removeLocationUpdates(locationCallback);
             }
             @Override
             public void onMapError(Exception error) {
-                // Error during map usage
+                // 인증 실패 및 지도 사용 중 에러가 발생할 때 호출됨
                 Log.d("MainMap", error.getMessage());
             }
         }, new KakaoMapReadyCallback() {
             @Override
             public void onMapReady(KakaoMap Map) {
+                // 인증 후 Kakaomap API 가 정상적으로 실행될 때 호출됨
                 kakaoMap = Map;
                 labelLayer = kakaoMap.getLabelManager().getLayer();
 
@@ -308,6 +312,7 @@ public class MapActivity extends AppCompatActivity {
                     DBConnect();
                 }
             }
+
         });
 
         btn_address_search.setOnClickListener(v -> {
@@ -328,7 +333,7 @@ public class MapActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(Location location) {
                             if (location != null) {
-                                CameraUpdate cameraUpdate = CameraUpdateFactory.newCenterPosition(LatLng.from(location.getLatitude(), location.getLongitude()));
+                                cameraUpdate = CameraUpdateFactory.newCenterPosition(LatLng.from(location.getLatitude(), location.getLongitude()));
                                 // 지도의 카메라 위치를 업데이트
                                 kakaoMap.moveCamera(cameraUpdate, CameraAnimation.from(500, true, true));
                             }
@@ -378,11 +383,10 @@ public class MapActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Location location) {
                 if (location != null) {
-                    // 현재 위치의 위도와 경도를 기반으로 카메라 업데이트 생성
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newCenterPosition(LatLng.from(location.getLatitude(), location.getLongitude()));
-
                     // 카카오 지도의 카메라 위치를 마지막 위치로 업데이트
-                    kakaoMap.moveCamera(cameraUpdate, CameraAnimation.from(500, true, true));
+                    cameraUpdate = CameraUpdateFactory.newCenterPosition(LatLng.from(location.getLatitude(), location.getLongitude()));
+                    // 지도의 카메라 위치를 업데이트
+                    kakaoMap.moveCamera(cameraUpdate);
 
                     if(centerLabel == null){
                         //유저 라벨 생성 및 표시
