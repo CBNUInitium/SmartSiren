@@ -22,6 +22,7 @@ public class DetailInfo extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.show_detail_info);
 
+
         sortOfCase = (TextView)findViewById(R.id.event_code);
         reliabilityLvl = (TextView)findViewById(R.id.reliability_lvl);
         detailContents = (TextView)findViewById(R.id.detail);
