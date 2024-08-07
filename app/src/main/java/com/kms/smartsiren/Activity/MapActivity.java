@@ -103,7 +103,6 @@ public class MapActivity extends AppCompatActivity {
     private KakaoMap kakaoMap;
     private FusedLocationProviderClient fusedLocationClient;
     private static final String GEOCODE_URL = "http://dapi.kakao.com/v2/local/search/address.json?query=";
-    //Rest API 키, 테스트할려면 바꿔야 함.
     private static final String GEOCODE_USER_INFO = "KakaoAK 34a0d68415a4c446c7c907b81b64a078";
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -302,6 +301,8 @@ public class MapActivity extends AppCompatActivity {
                     // 라벨 아이디 출력
                     String message = "Label clicked: " + label.getLabelId() + "\n";
                     Toast.makeText(MapActivity.this, message, Toast.LENGTH_LONG).show();
+
+                    // 라벨 아이디에 해당하는 DB에 저장된 사건 정보 띄우기 추가 필요
                 });
 
                 if (ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
